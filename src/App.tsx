@@ -4,8 +4,6 @@ import { useRecoilState } from "recoil";
 import { toDoState } from "./atoms";
 import Board from "./Components/Board";
 import { useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faTrashArrowUp } from "@fortawesome/free-solid-svg-icons";
 import DroppableGarbage from "./Components/DroppableGarbage";
 
 const Wrapper = styled.div`
@@ -36,7 +34,7 @@ function App() {
   console.log(Object.keys(toDos));
   const onDragEnd = (info: DropResult) => {
     console.log(info);
-    const { destination, draggableId, source } = info;
+    const { destination, source } = info;
     if (!destination) return;
     if (destination?.droppableId === source.droppableId) {
       // same board movement.
@@ -59,21 +57,22 @@ function App() {
           const result = { ...todos, [source.droppableId]: copiedSource };
           return result;
         });
+      } else {
+        // cross board movement
+        setToDos((allBoards) => {
+          const sourceBoard = [...allBoards[source.droppableId]];
+          const taskObj = sourceBoard[source.index];
+          console.log(taskObj);
+          const destinationBoard = [...allBoards[destination.droppableId]];
+          sourceBoard.splice(source.index, 1);
+          destinationBoard.splice(destination?.index, 0, taskObj);
+          return {
+            ...allBoards,
+            [source.droppableId]: sourceBoard,
+            [destination.droppableId]: destinationBoard,
+          };
+        });
       }
-      // cross board movement
-      setToDos((allBoards) => {
-        const sourceBoard = [...allBoards[source.droppableId]];
-        const taskObj = sourceBoard[source.index];
-        console.log(taskObj);
-        const destinationBoard = [...allBoards[destination.droppableId]];
-        sourceBoard.splice(source.index, 1);
-        destinationBoard.splice(destination?.index, 0, taskObj);
-        return {
-          ...allBoards,
-          [source.droppableId]: sourceBoard,
-          [destination.droppableId]: destinationBoard,
-        };
-      });
     }
   };
   useEffect(() => {
