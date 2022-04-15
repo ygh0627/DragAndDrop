@@ -31,7 +31,6 @@ const TrashArea = styled.div`
 `;
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
-  console.log(Object.keys(toDos));
   const onDragEnd = (info: DropResult) => {
     console.log(info);
     const { destination, source } = info;
