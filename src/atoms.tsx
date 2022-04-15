@@ -9,10 +9,12 @@ export interface ITodo {
 interface IToDoState {
   [key: string]: ITodo[];
 }
-const localStorageTodo = localStorage.getItem("TODOS") || "{}";
+const localStorageTodo = localStorage.getItem("TODOS") || "null";
 const parsedLocalStorageTodo = JSON.parse(localStorageTodo);
 
 export const toDoState = atom<IToDoState>({
   key: "toDo",
-  default: parsedLocalStorageTodo,
+  default: parsedLocalStorageTodo
+    ? parsedLocalStorageTodo
+    : { "To Do": [], Doing: [], Done: [] },
 });
