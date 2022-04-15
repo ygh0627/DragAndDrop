@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { useRecoilState } from "recoil";
-import { toDoState } from "./atoms";
+import { parsedLocalStorageTodo, toDoState } from "./atoms";
 import Board from "./Components/Board";
 import { useEffect } from "react";
 import DroppableGarbage from "./Components/DroppableGarbage";
