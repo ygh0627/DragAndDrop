@@ -1,13 +1,12 @@
 import styled from "styled-components";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "react-beautiful-dnd";
+import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { useRecoilState } from "recoil";
 import { toDoState } from "./atoms";
 import Board from "./Components/Board";
+import { useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faTrashArrowUp } from "@fortawesome/free-solid-svg-icons";
+import DroppableGarbage from "./Components/DroppableGarbage";
 
 const Wrapper = styled.div`
   display: flex;
@@ -17,6 +16,7 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+  position: relative;
 `;
 
 const Boards = styled.div`
@@ -27,9 +27,13 @@ const Boards = styled.div`
   gap: 10px;
 `;
 
+const TrashArea = styled.div`
+  position: absolute;
+  bottom: 40px;
+`;
 function App() {
   const [toDos, setToDos] = useRecoilState(toDoState);
-
+  console.log(Object.keys(toDos));
   const onDragEnd = (info: DropResult) => {
     console.log(info);
     const { destination, draggableId, source } = info;
@@ -38,8 +42,9 @@ function App() {
       // same board movement.
       setToDos((allBoards) => {
         const boardCopy = [...allBoards[source.droppableId]];
+        const taskObj = boardCopy[source.index];
         boardCopy.splice(source.index, 1);
-        boardCopy.splice(destination?.index, 0, draggableId);
+        boardCopy.splice(destination?.index, 0, taskObj);
         return {
           ...allBoards,
           [source.droppableId]: boardCopy,
@@ -47,12 +52,22 @@ function App() {
       });
     }
     if (destination.droppableId !== source.droppableId) {
+      if (destination.droppableId === "garbage") {
+        setToDos((todos) => {
+          const copiedSource = [...todos[source.droppableId]];
+          copiedSource.splice(source.index, 1);
+          const result = { ...todos, [source.droppableId]: copiedSource };
+          return result;
+        });
+      }
       // cross board movement
       setToDos((allBoards) => {
         const sourceBoard = [...allBoards[source.droppableId]];
+        const taskObj = sourceBoard[source.index];
+        console.log(taskObj);
         const destinationBoard = [...allBoards[destination.droppableId]];
         sourceBoard.splice(source.index, 1);
-        destinationBoard.splice(destination?.index, 0, draggableId);
+        destinationBoard.splice(destination?.index, 0, taskObj);
         return {
           ...allBoards,
           [source.droppableId]: sourceBoard,
@@ -61,6 +76,10 @@ function App() {
       });
     }
   };
+  useEffect(() => {
+    localStorage.setItem("TODOS", JSON.stringify(toDos));
+  }, [toDos]);
+
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <Wrapper>
@@ -69,6 +88,9 @@ function App() {
             <Board key={boardId} boardId={boardId} toDos={toDos[boardId]} />
           ))}
         </Boards>
+        <TrashArea>
+          <DroppableGarbage />
+        </TrashArea>
       </Wrapper>
     </DragDropContext>
   );
